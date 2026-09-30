@@ -379,18 +379,3 @@ Set `CLOUDINARY_URL` in the host's dashboard, not in the repository. On free tie
 
 ---
 
-## 14. Screenshots
-
-> Add your screenshots to a `docs/` folder and update the paths below.
-
-| Evidence library | Before / after slider |
-|---|---|
-| ![Evidence library](docs/evidence-library.png) | ![Before and after](docs/before-after.png) |
-
-| Proof on click | PDF report |
-|---|---|
-| ![Proof dialog](docs/proof-dialog.png) | ![PDF report](docs/pdf-report.png) |
-
----
-
-**Live demo:** _add your deployed URL here_  ·  **Video walkthrough:** _add your link here_
