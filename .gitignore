@@ -1,0 +1,5 @@
+node_modules
+.env
+data
+demo-data
+real-photos

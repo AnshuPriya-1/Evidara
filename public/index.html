@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Evidara</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{--bg:#f3f5f2;--ink:#1c2420;--mute:#5d6b63;--line:#d5dcd6;--acc:#0f5c4d;--warn:#b4531a;--ok:#1d7a3f;--card:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Georgia,'Times New Roman',serif}
+header{padding:28px 32px 8px}h1{margin:0;font-size:34px;letter-spacing:-.5px}header p{margin:4px 0 0;color:var(--mute)}
+main{padding:16px 32px 48px;display:grid;gap:20px}
+section{background:var(--card);border:1px solid var(--line);padding:16px 18px}
+h2{margin:0 0 10px;font-size:18px}
+label{font:13px system-ui,sans-serif;color:var(--mute)}
+input,select,button{font:14px system-ui,sans-serif;padding:7px 10px;border:1px solid var(--line);background:#fff}
+button{background:var(--acc);color:#fff;border-color:var(--acc);cursor:pointer}button.ghost{background:#fff;color:var(--acc)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--warn);outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:end}.row>div{display:flex;flex-direction:column;gap:3px}
+.stats{display:flex;gap:28px;font:14px system-ui,sans-serif}.stats b{font:700 26px Georgia,serif;display:block}
+.two{display:grid;grid-template-columns:1.4fr 1fr;gap:20px}@media(max-width:800px){.two{grid-template-columns:1fr}main,header{padding-left:16px;padding-right:16px}}
+#map{height:260px}.tl{display:flex;align-items:end;gap:8px;height:260px}.tl div{flex:1;background:var(--acc);color:#fff;font:12px system-ui;text-align:center;min-width:28px}
+.tl span{display:block;color:var(--mute);font:11px system-ui;text-align:center}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.card{border:1px solid var(--line);background:#fff}.card img{width:100%;height:170px;object-fit:cover;display:block;background:#ddd}
+.card .b{padding:10px 12px;font:13px system-ui,sans-serif;display:grid;gap:5px}
+.tag{display:inline-block;background:#e8eee9;padding:1px 7px;margin:0 3px 3px 0;font-size:12px}
+.badge{font-weight:600}.ok{color:var(--ok)}.nr{color:var(--warn)}
+.hash{font:11px ui-monospace,monospace;color:var(--mute);word-break:break-all}
+#msg{font:14px system-ui,sans-serif;margin-top:8px;white-space:pre-wrap}
+.pair{border:1px solid var(--line);padding:10px;background:#fff}.cmp{position:relative;height:260px;overflow:hidden;background:#ddd}
+.cmp img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.cmp .top{clip-path:inset(0 calc(100% - var(--p,50%)) 0 0)}
+.cmp input{position:absolute;left:0;right:0;bottom:6px;width:100%;padding:0}.lab{position:absolute;top:8px;background:rgba(0,0,0,.6);color:#fff;font:12px system-ui;padding:2px 8px}
+.claim{border-top:1px solid var(--line);padding:10px 0;font:14px system-ui,sans-serif}.claim label{display:flex;gap:8px;align-items:start;color:var(--ink)}
+.out{margin-top:10px;font:14px system-ui,sans-serif;white-space:pre-wrap}textarea{width:100%;height:120px;font:13px system-ui}
+dialog{max-width:520px;border:1px solid var(--line);font:14px system-ui,sans-serif}dialog img{width:100%}
+</style></head><body>
+<header><h1>Evidara</h1><p>Field photos in, verified evidence out. <span id="mode"></span><br><b>Demo build:</b> sample photos with simulated dates and GPS.</p></header>
+<main>
+<section><h2>Add field media</h2><div class="row">
+<div><label for="fp">Project</label><select id="fp"></select></div>
+<div><label for="fa">Activity (optional)</label><input id="fa" placeholder="e.g. planting"></div>
+<div><label for="ff">Files</label><input id="ff" type="file" multiple accept="image/*,video/*"></div>
+<button id="up">Upload and organise</button></div><div id="msg"></div></section>
+
+<section><div class="stats" id="stats"></div></section>
+
+<section><h2>Search</h2><div class="row">
+<div><label for="q">Describe what you need</label><input id="q" size="34" placeholder="planting riverbank"></div>
+<div><label for="sp">Project</label><select id="sp"></select></div>
+<div><label for="ss">Status</label><select id="ss"><option value="">All</option><option value="ok">Verified metadata</option><option value="needs_review">Needs review</option></select></div>
+<div><label for="fr">From</label><input id="fr" type="date"></div><div><label for="to">To</label><input id="to" type="date"></div>
+<button id="go">Search</button></div></section>
+
+<div class="two"><section><h2>Map</h2><div id="map"></div></section><section><h2>Timeline (photos per month)</h2><div class="tl" id="tl"></div></section></div>
+<section><h2 id="rt">Evidence</h2><div class="grid" id="grid"></div></section>
+<section><h2>Before / after</h2>
+<p style="margin:0 0 10px;font:13px system-ui;color:var(--mute)">Photos of the same area on different dates. Evidara does not measure change. A person must judge what changed.</p>
+<div class="row"><div><label for="pp">Project</label><select id="pp"></select></div><div><label><input id="pb" type="checkbox"> Blur faces (Cloudinary only)</label></div><button id="pl">Find pairs</button></div>
+<div class="grid" id="pairs" style="margin-top:12px"></div></section>
+
+<section><h2>Report</h2>
+<div class="row"><div><label for="rp">Project</label><select id="rp"></select></div><div><label for="rf">From</label><input id="rf" type="date"></div><div><label for="rt2">To</label><input id="rt2" type="date"></div>
+<div><label><input id="rb" type="checkbox"> Blur faces in PDF (Cloudinary only)</label></div><button id="rg">Generate report</button></div>
+<div id="rep"></div><div class="out" id="rout"></div></section>
+<dialog id="dlg"></dialog>
+</main>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const $=id=>document.getElementById(id);let cfg,map,layer;
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const siteName=id=>(cfg.sites.find(s=>s.id===id)||{}).name||'Unassigned';
+const qs=()=>new URLSearchParams(Object.entries({q:$('q').value,project:$('sp').value,status:$('ss').value,from:$('fr').value,to:$('to').value}).filter(([,v])=>v)).toString();
+
+async function init(){
+  cfg=await (await fetch('/api/config')).json();
+  $('mode').textContent=cfg.mode==='cloudinary'?'Storage: Cloudinary':'Storage: local demo mode (add CLOUDINARY_URL to use Cloudinary)';
+  const opts=cfg.projects.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
+  $('fp').innerHTML='<option value="">Detect from GPS</option>'+opts; $('sp').innerHTML='<option value="">All projects</option>'+opts;
+  map=L.map('map').setView([24,89],4);L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(map);layer=L.layerGroup().addTo(map);
+  refresh();
+}
+async function refresh(){
+  const [rows,tl,all]=await Promise.all([fetch('/api/assets?'+qs()).then(r=>r.json()),fetch('/api/timeline?'+qs()).then(r=>r.json()),fetch('/api/assets').then(r=>r.json())]);
+  ALL=all;const nr=all.filter(r=>r.status!=='ok').length;
+  $('stats').innerHTML=`<div><b>${all.length}</b>files stored</div><div><b>${all.length-nr}</b>ready to use</div><div><b>${nr}</b>need review</div>`;
+  $('rt').textContent=`Evidence (${rows.length} shown)`;
+  $('grid').innerHTML=rows.length?rows.map(card).join(''):'<p>Nothing matches. Clear a filter or upload files.</p>';
+  layer.clearLayers();const pts=rows.filter(r=>r.lat!=null).map(r=>{L.circleMarker([r.lat,r.lng],{radius:5,color:r.status==='ok'?'#0f5c4d':'#b4531a'}).bindPopup(esc(r.filename)).addTo(layer);return[r.lat,r.lng]});
+  if(pts.length)map.fitBounds(pts,{padding:[20,20],maxZoom:12});
+  const mx=Math.max(1,...tl.map(t=>t.count));
+  $('tl').innerHTML=tl.map(t=>`<div style="height:${Math.round(t.count/mx*100)}%"><span style="margin-top:-16px">${t.count}</span></div>`).join('')||'<p>No dates yet.</p>';
+  $('tl').insertAdjacentHTML('afterend','');
+  document.querySelectorAll('.tl div').forEach((d,i)=>d.title=tl[i].month);
+}
+function card(r){
+  const v=r.verification;
+  return `<div class="card"><a href="${esc(r.original_url)}" target="_blank" rel="noopener"><img loading="lazy" src="${esc(r.thumb_url)}" alt="${esc(r.caption||r.filename)}"></a><div class="b">
+  <div><span class="badge ${r.status==='ok'?'ok':'nr'}">${r.status==='ok'?'Ready to use':'Needs review'}</span> ${r.flags.length?'- '+esc(r.flags.join(', ')):''}</div>
+  <div><b>${esc(r.filename)}</b></div><div>${esc(siteName(r.site))} · ${r.taken_at?r.taken_at.slice(0,10):'no date'} · ${esc(r.activity||'no activity')}</div>
+  ${r.caption?`<div>${esc(r.caption)}</div>`:''}<div>${(r.tags||[]).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>
+  <div class="hash">SHA-256 ${r.sha256.slice(0,24)}…</div>
+  <div><button class="ghost" onclick="ver('${r.id}',this)">Verify original</button> <span id="v-${r.id}">${v?(v.match?'✔ Matches (checked '+v.checked_at.slice(0,10)+')':'✖ MISMATCH'):''}</span></div>
+  ${r.ai_warning?`<div class="nr">${esc(r.ai_warning)}</div>`:''}</div></div>`;
+}
+async function ver(id,btn){btn.disabled=true;const r=await fetch(`/api/assets/${id}/verify`,{method:'POST'});const j=await r.json();
+  $('v-'+id).textContent=j.error?'Error: '+j.error:(j.match?'✔ Original matches its fingerprint':'✖ MISMATCH: file changed since upload');btn.disabled=false}
+$('up').onclick=async()=>{
+  const f=$('ff').files;if(!f.length){$('msg').textContent='Choose at least one file.';return}
+  const fd=new FormData();if($('fp').value)fd.append('project',$('fp').value);if($('fa').value)fd.append('activity',$('fa').value.trim().toLowerCase());
+  for(const x of f)fd.append('files',x);$('up').disabled=true;$('msg').textContent=`Uploading ${f.length} files…`;
+  try{const j=await (await fetch('/api/upload',{method:'POST',body:fd})).json();
+    $('msg').textContent=`Added ${j.added.length}. Skipped ${j.duplicates.length} duplicates. ${j.added.filter(a=>a.status!=='ok').length} need review.`+(j.errors.length?`\n${j.errors.length} failed: ${j.errors.map(e=>e.filename+' ('+e.error+')').join('; ')}`:'')}
+  catch(e){$('msg').textContent='Upload failed: '+e.message}
+  $('up').disabled=false;refresh()};
+$('go').onclick=refresh;$('q').onkeydown=e=>{if(e.key==='Enter')refresh()};
+let ALL=[],REP=null;
+const fmtD=d=>d?d.slice(0,10):'no date';
+async function loadPairs(){
+  const q=new URLSearchParams({project:$('pp').value,blur:$('pb').checked?1:0});
+  const rows=await fetch('/api/pairs?'+q).then(r=>r.json());
+  $('pairs').innerHTML=rows.length?rows.map(p=>`<div class="pair"><div class="cmp"><img src="${esc(p.after_url)}" alt="After"><img class="top" src="${esc(p.before_url)}" alt="Before">
+  ${cfg.mode==='local'?`<span class="lab" style="left:8px">${p.before_label}</span><span class="lab" style="right:8px">${p.after_label}</span>`:''}
+  <input type="range" min="0" max="100" value="50" aria-label="Compare before and after" oninput="this.parentNode.style.setProperty('--p',this.value+'%')"></div>
+  <div style="font:13px system-ui;margin-top:6px">${esc(siteName(p.site))} · ${p.days} days apart · ${p.distance_m} m apart</div></div>`).join(''):'<p>No pairs yet. A pair needs two clean photos of one site, at least 30 days apart.</p>';
+}
+function proof(id){
+  const r=ALL.find(x=>x.id===id);if(!r)return;
+  $('dlg').innerHTML=`<img src="${esc(r.thumb_url)}" alt="${esc(r.filename)}"><p><b>${esc(r.filename)}</b><br>${fmtD(r.taken_at)} · ${esc(siteName(r.site))} · ${r.lat!=null?r.lat.toFixed(4)+', '+r.lng.toFixed(4):'no GPS'}<br>Status: ${r.status==='ok'?'checks passed':'needs review: '+esc(r.flags.join(', '))}</p>
+  <p class="hash">SHA-256 ${r.sha256}</p><p>Edits since upload: ${r.audit.length}. Original is never changed; previews are made by transformation.</p>
+  <p><a href="${esc(r.original_url)}" target="_blank" rel="noopener">Open original file</a></p>
+  <p><button onclick="pver('${r.id}')">Verify original</button> <span id="pv"></span> <button class="ghost" onclick="$('dlg').close()">Close</button></p>`;
+  $('dlg').showModal();
+}
+async function pver(id){const j=await (await fetch(`/api/assets/${id}/verify`,{method:'POST'})).json();
+  $('pv').textContent=j.error?'Error: '+j.error:(j.match?'✔ Matches its fingerprint':'✖ MISMATCH')}
+function renderRep(){
+  const r=REP;if(!r)return;
+  $('rep').innerHTML=`<p style="font:14px system-ui"><b>${esc(r.project_name)}</b>: ${r.claims.length} claims. Every claim links to source files. Tick the claims you have checked and approve. Only approved claims are exported.</p>`+
+  r.claims.map(c=>`<div class="claim"><label><input type="checkbox" ${c.approved?'checked':''} onchange="appr('${c.id}',this.checked)"><span>${esc(c.text)}</span></label><div style="margin-left:26px">Evidence: ${c.evidence.slice(0,6).map(i=>{const a=ALL.find(x=>x.id===i);return `<a href="#" class="tag" onclick="proof('${i}');return false">${esc(a?a.filename:i)}</a>`}).join('')}${c.evidence.length>6?` +${c.evidence.length-6} more`:''}</div></div>`).join('')+
+  `<div class="row" style="margin-top:12px"><button class="ghost" onclick="appr('all',true)">Approve all</button><button onclick="location.href='/api/reports/${r.id}/pdf'">Download PDF</button><button onclick="reel()">Create video reel</button><button onclick="soc()">Social post</button></div>`;
+}
+async function appr(cid,val){const r=await fetch(`/api/reports/${REP.id}/approve/${cid}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({approved:val})});REP=await r.json();renderRep()}
+async function reel(){$('rout').textContent='Building reel…';const j=await (await fetch(`/api/reports/${REP.id}/reel`,{method:'POST'})).json();
+  $('rout').innerHTML=j.error?'Could not build reel: '+esc(j.error):`Reel requested. Cloudinary can take a minute to render it: <a href="${esc(j.url)}" target="_blank" rel="noopener">open video</a>`}
+async function soc(){const j=await (await fetch(`/api/reports/${REP.id}/social`)).json();
+  $('rout').innerHTML=j.error?esc(j.error):`<b>Long post</b><textarea readonly>${esc(j.long)}</textarea><b>Short post (X / Twitter)</b><textarea readonly style="height:70px">${esc(j.short)}</textarea>`}
+$('pl').onclick=loadPairs;
+$('rg').onclick=async()=>{const b={project:$('rp').value,from:$('rf').value,to:$('rt2').value,blur:$('rb').checked};
+  const j=await (await fetch('/api/reports',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)})).json();
+  if(j.error){$('rep').textContent=j.error;return}REP=j;$('rout').textContent='';renderRep()};
+init().then(()=>{const o=cfg.projects.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');$('pp').innerHTML='<option value="">All projects</option>'+o;$('rp').innerHTML=o;loadPairs()});
+</script></body></html>
