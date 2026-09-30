@@ -1,0 +1,60 @@
+[
+ {
+  "id": "94e12bd48d",
+  "project": "riverbank",
+  "project_name": "Riverbank Restoration",
+  "from": null,
+  "to": null,
+  "blur": false,
+  "created_at": "2026-09-30T16:46:45.869Z",
+  "claims": [
+   {
+    "id": "c1",
+    "type": "overview",
+    "text": "4 files with checked location and date were collected for Riverbank Restoration between 2026-02-01 and 2026-08-29, across 1 site.",
+    "evidence": [
+     "50c1ad9efbff",
+     "31ce0bd13386",
+     "2ebaf962235c",
+     "2d21e67c3c61"
+    ],
+    "approved": false
+   },
+   {
+    "id": "c2",
+    "type": "activity",
+    "text": "2 files document monitoring at North Riverbank.",
+    "evidence": [
+     "50c1ad9efbff",
+     "31ce0bd13386"
+    ],
+    "approved": false
+   },
+   {
+    "id": "c3",
+    "type": "activity",
+    "text": "2 files document survey at North Riverbank.",
+    "evidence": [
+     "2ebaf962235c",
+     "2d21e67c3c61"
+    ],
+    "approved": false
+   },
+   {
+    "id": "c4",
+    "type": "pair",
+    "text": "Visible change to review at North Riverbank: two photos of the same area taken 209 days apart (2026-02-01 and 2026-08-29), 63 m apart. A person must confirm what has changed.",
+    "evidence": [
+     "2ebaf962235c",
+     "50c1ad9efbff"
+    ],
+    "approved": false,
+    "site": "site-north",
+    "pair": [
+     "2ebaf962235c",
+     "50c1ad9efbff"
+    ]
+   }
+  ]
+ }
+]
