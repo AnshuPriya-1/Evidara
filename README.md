@@ -378,5 +378,3 @@ Set `CLOUDINARY_URL` in the host's dashboard, not in the repository. On free tie
 - Offline-first mobile capture for field teams
 
 ---
-
-**Live demo:** https://anshupriya-1.github.io/Evidara/  
