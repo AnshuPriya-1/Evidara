@@ -1,0 +1,41 @@
+{
+  "projects": [
+    {
+      "id": "riverbank",
+      "name": "Riverbank Restoration",
+      "start": "2026-01-01",
+      "end": "2026-12-31"
+    },
+    {
+      "id": "water",
+      "name": "Village Water Access",
+      "start": "2026-01-01",
+      "end": "2026-12-31"
+    }
+  ],
+  "sites": [
+    {
+      "id": "site-north",
+      "name": "North Riverbank",
+      "project": "riverbank",
+      "lat": 26.101043,
+      "lng": 91.482763
+    },
+    {
+      "id": "site-south",
+      "name": "South Village",
+      "project": "water",
+      "lat": 26.085432,
+      "lng": 91.543064
+    }
+  ],
+  "activities": [
+    "planting",
+    "survey",
+    "monitoring",
+    "drilling",
+    "pipeline",
+    "meeting"
+  ],
+  "mode": "local"
+}

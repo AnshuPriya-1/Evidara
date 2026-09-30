@@ -7,7 +7,7 @@ fs.rmSync(OUT, { recursive: true, force: true }); fs.mkdirSync(OUT, { recursive:
 
 let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
 const fmt = d => d.toISOString().slice(0, 19).replace(/-/g, ':').replace('T', ' ');
-const acts = { mangrove: ['survey', 'planting', 'monitoring'], water: ['survey', 'drilling', 'pipeline', 'meeting'] };
+const acts = { riverbank: ['survey', 'planting', 'monitoring'], water: ['survey', 'drilling', 'pipeline', 'meeting'] };
 const green = { survey: '#8a7f5a', planting: '#6b8f4e', monitoring: '#2f7d4f', drilling: '#7a6a55', pipeline: '#5a7a8a', meeting: '#8a6a7a' };
 
 async function make(name, { text, color, lat, lng, date, blur }) {
