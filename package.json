@@ -2,6 +2,7 @@
   "name": "evidara",
   "version": "0.1.0",
   "description": "Evidara - verified field-media evidence platform (Phase 1: trusted evidence base)",
+  "engines": { "node": ">=18" },
   "main": "server.js",
   "scripts": {
     "stamp": "node scripts/stamp-photos.js",
